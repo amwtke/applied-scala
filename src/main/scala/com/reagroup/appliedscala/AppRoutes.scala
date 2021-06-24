@@ -26,7 +26,7 @@ class AppRoutes(fetchAllMoviesHandler: IO[Response[IO]],
 //    case GET -> Root / "movies" / LongVar(id) => fetchMovieHandler(id)
     case GET -> Root / "movies" / LongVar(id) :? OptionalEnrichedMatcher(optEnrich) =>
       if (optEnrich.contains(true)) fetchEnrichedMovieHandler(id) else fetchMovieHandler(id)
-    case req@POST -> Root / "movies" => saveMovieHandler(req)
-    case req@POST -> Root / "movies" / LongVar(id) / "reviews" => saveReviewHandler(id, req)
+    case req@ POST -> Root / "movies" => saveMovieHandler(req)
+    case req@ POST -> Root / "movies" / LongVar(id) / "reviews" => saveReviewHandler(id, req)
   }
 }
