@@ -12,5 +12,6 @@ object Review {
     *
     * Hint: Use `deriveEncoder`
     */
-
+  implicit val encoder = deriveEncoder[Review]
+  implicit val decoder = deriveDecoder[Review]
 }
