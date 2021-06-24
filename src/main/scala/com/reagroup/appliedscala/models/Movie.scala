@@ -1,6 +1,6 @@
 package com.reagroup.appliedscala.models
 
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
 
 case class Movie(name: String, synopsis: String, reviews: Vector[Review])
@@ -12,6 +12,6 @@ object Movie {
     *
     * Hint: Use `deriveEncoder`
     */
-  implicit val encoder = deriveEncoder[Movie]
-  implicit val decoder = deriveDecoder[Movie]
+  implicit val encoder: Encoder.AsObject[Movie] = deriveEncoder[Movie]
+  implicit val decoder: Decoder[Movie] = deriveDecoder[Movie]
 }

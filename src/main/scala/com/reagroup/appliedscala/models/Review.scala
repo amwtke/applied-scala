@@ -12,6 +12,6 @@ object Review {
     *
     * Hint: Use `deriveEncoder`
     */
-  implicit val encoder = deriveEncoder[Review]
-  implicit val decoder = deriveDecoder[Review]
+  implicit val encoder: Encoder.AsObject[Review] = deriveEncoder[Review]
+  implicit val decoder: Decoder[Review] = deriveDecoder[Review]
 }
