@@ -29,7 +29,7 @@ object CirceExercises {
     * Why is the return type an `Either`?
     */
   def strToJson(str: String): Either[ParsingFailure, Json] = {
-    ???
+    parser.parse(str)
   }
 
   /**
@@ -72,7 +72,10 @@ object CirceExercises {
       * - https://www.parsonsmatt.org/2017/01/07/how_do_type_classes_differ_from_interfaces.html
       */
     implicit val personEncoder: Encoder[Person] = (p: Person) => {
-      ???
+      Json.obj(
+        "name" -> p.name.asJson,
+        "age" -> p.age.asJson
+      )
     }
 
     /**
@@ -104,7 +107,7 @@ object CirceExercises {
     * Use `differentPersonEncoder` explicitly to encode the person
     */
   def encodePersonDifferently(person: Person): Json = {
-    person.asJson(???)
+    person.asJson(Person.differentPersonEncoder)
   }
 
   /**
@@ -122,7 +125,7 @@ object CirceExercises {
   def encodePersonSemiAuto(person: Person): Json = {
     import io.circe.generic.semiauto._
 
-    implicit val personEncoder: Encoder[Person] = ???
+    implicit val personEncoder: Encoder[Person] = deriveEncoder[Person]
     person.asJson
   }
 
@@ -159,8 +162,18 @@ object CirceExercises {
     import cats.implicits._
 
     implicit val personDecoder: Decoder[Person] = new Decoder[Person] {
-      override def apply(cursor: HCursor): Result[Person] = ???
+      override def apply(cursor: HCursor): Result[Person] = for {
+        name <- cursor.get[String]("name")
+        age <- cursor.get[Int]("age")
+      } yield Person(name, age)
     }
+
+    //    implicit val personDecoder: Decoder[Person] = (cursor: HCursor) => for {
+    //      name <- cursor.downField("name").as[String]
+    //      age <- cursor.downField("age").as[Int]
+    //    } yield Person(name, age)
+
+
     // note: a lot of boilerplate can be removed. Try pressing alt-enter with your
     // cursor over "new Decoder[Person]" above. This works because Decoder is a trait with
     // a single abstract method.
@@ -177,7 +190,7 @@ object CirceExercises {
   def decodePersonSemiAuto(json: Json): Either[DecodingFailure, Person] = {
     import io.circe.generic.semiauto._
 
-    implicit val personDecoder: Decoder[Person] = ???
+    implicit val personDecoder: Decoder[Person] = deriveDecoder[Person]
 
     json.as[Person]
   }
@@ -190,9 +203,14 @@ object CirceExercises {
   def strToPerson(str: String): Either[Error, Person] = {
     import io.circe.generic.semiauto._
 
-    implicit val personDecoder: Decoder[Person] = ???
+    implicit val personDecoder: Decoder[Person] = deriveDecoder[Person]
 
-    ???
+    parser.decode[Person](str)
+
+//    for {
+//      json <- parser.parse(str)
+//      p <- json.as[Person]
+//    } yield p
   }
 
 }
