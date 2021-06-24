@@ -21,7 +21,10 @@ class AppRoutes(fetchAllMoviesHandler: IO[Response[IO]],
   object OptionalEnrichedMatcher extends OptionalQueryParamDecoderMatcher[Boolean]("enriched")
 
   val openRoutes: HttpRoutes[IO] = HttpRoutes.of {
-    case ->(GET, /(Root, "movies")) => fetchAllMoviesHandler
+    case ->(GET, /(Root, "movies")) => {
+      println("f!!!!!!!!!!!!!!!!!!!!!!!!!")
+      fetchAllMoviesHandler
+    }
     case PUT -> Root / "movies" => fetchAllMoviesHandler
     //    case GET -> Root / "movies" / LongVar(id) => fetchMovieHandler(id)
     case GET -> Root / "movies" / LongVar(id) :? OptionalEnrichedMatcher(optEnrich) =>
