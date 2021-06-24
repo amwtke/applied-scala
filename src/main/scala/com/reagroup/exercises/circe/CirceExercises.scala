@@ -19,7 +19,7 @@ import io.circe.syntax._
   * 2. Encoding (`A => Json`)
   * 3. Decoding (`Json => A`)
   */
-object CirceExercises extends App {
+object CirceExercises {
 
   /**
     * Json Parsing
