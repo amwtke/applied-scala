@@ -34,6 +34,16 @@ class FetchEnrichedMovieService(fetchMovie: MovieId => IO[Option[Movie]],
     * Given a `Movie`, we can call `fetchMetascore` using the `name` of the `Movie`.
     * If no `Metascore` is found, raise an `EnrichmentFailure` using `IO.raiseError`.
     * */
-  private def enrichMovieWithMetascore(movie: Movie): IO[EnrichedMovie] = ???
+  private def enrichMovieWithMetascore(movie: Movie): IO[EnrichedMovie] = fetchMetascore(movie.name).flatMap {
+    case None => IO.raiseError(EnrichmentFailure(movie.name))
+    case Some(meta) => IO.pure(EnrichedMovie(movie, meta))
+  }
 
+  //    for {
+  //    maybeMeta <- fetchMetascore(movie.name)
+  //    em <- maybeMeta match {
+  //      case None => IO.raiseError(EnrichmentFailure(movie.name))
+  //      case Some(meta) => IO.pure(EnrichedMovie(movie, meta))
+  //    }
+  //  } yield em
 }
