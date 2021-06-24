@@ -19,7 +19,7 @@ import io.circe.syntax._
   * 2. Encoding (`A => Json`)
   * 3. Decoding (`Json => A`)
   */
-object CirceExercises {
+object CirceExercises extends App {
 
   /**
     * Json Parsing
@@ -190,6 +190,10 @@ object CirceExercises {
   def decodePersonSemiAuto(json: Json): Either[DecodingFailure, Person] = {
     import io.circe.generic.semiauto._
 
+    /**
+      * 在没有定义自己的implicit 的Decorder[Person]
+      * 的时候可以半自动的给你默认一个。
+      */
     implicit val personDecoder: Decoder[Person] = deriveDecoder[Person]
 
     json.as[Person]
@@ -207,10 +211,37 @@ object CirceExercises {
 
     parser.decode[Person](str)
 
-//    for {
-//      json <- parser.parse(str)
-//      p <- json.as[Person]
-//    } yield p
+    //    for {
+    //      json <- parser.parse(str)
+    //      p <- json.as[Person]
+    //    } yield p
   }
+
+
+  /**
+    * 一些语法特点：如何初始化一个trait的匿名对象
+    */
+
+  //  /**
+  //    * 1\ 没有编译器优化的原始形态
+  //    */
+  //  implicit val personOrdering: Ordering[Person] = new Ordering[Person] {
+  //    override def compare(x: Person, y: Person): Int = x.age - y.age
+  //  }
+  //
+  //  /**
+  //    * 2\ 编译器简化
+  //    */
+  //  implicit val personOrdering2: Ordering[Person] = (x: Person, y: Person) => x.age - y.age
+
+  /**
+    * 3\ case 模式匹配
+    * 注意Person必须是case class 因为case class会自动生成unapply方法，来做模式匹配！！！！！
+    */
+  implicit val personOrdering3: Ordering[Person] = {
+    case (Person(_, a), Person(_, b)) => a - b
+  }
+
+  println(List(Person("name", 100), Person("xj", 1), Person("lj", 10)).sorted)
 
 }
