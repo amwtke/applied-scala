@@ -14,16 +14,18 @@ object Metascore {
     * Convert:
     *
     * {
-    *   ..
-    *   ..
-    *   "Metascore": "75",
-    *   ..
-    *   ..
+    * ..
+    * ..
+    * "Metascore": "75",
+    * ..
+    * ..
     * }
     *
     * into:
     *
     * `Metascore(75)`
     */
-
+  implicit val decoder: Decoder[Metascore] = (cursor: HCursor) => for {
+    value <- cursor.get[Int]("Metascore")
+  } yield Metascore(value)
 }

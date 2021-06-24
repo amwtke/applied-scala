@@ -18,7 +18,8 @@ class Http4sMetascoreRepository(httpClient: Client[IO], apiKey: String) {
       .withQueryParam("apikey", apiKey)
       .withQueryParam("t", movieName)
     val ioStr: IO[String] = httpClient.expect[String](omdbURI)
-    ???
+    ioStr.map(x => decode[Metascore](x).toOption)
+//    ioStr.map(x => decode[Metascore](x))
   }
 
 }

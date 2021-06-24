@@ -15,13 +15,25 @@ class FetchEnrichedMovieService(fetchMovie: MovieId => IO[Option[Movie]],
     *
     * Hint: We know we are going to be chaining multiple effects in `IO` so let's start a for-comprehension.
     * Also pattern match on `Option` if you're stuck!
-    **/
-  def fetch(movieId: MovieId): IO[Option[EnrichedMovie]] = ???
+    * */
+  def fetch(movieId: MovieId): IO[Option[EnrichedMovie]] = for {
+    maybeMovie <- fetchMovie(movieId)
+    enrich <- maybeMovie match {
+      case None => IO.pure(None)
+      case Some(movie) => enrichMovieWithMetascore(movie).map(x => Some(x))
+    }
+  } yield enrich
+
+
+  //    fetchMovie(movieId).flatMap {
+  //    case None => IO.pure(None)
+  //    case Some(movie) => enrichMovieWithMetascore(movie).map(em => Some(em))
+  //  }
 
   /**
     * Given a `Movie`, we can call `fetchMetascore` using the `name` of the `Movie`.
     * If no `Metascore` is found, raise an `EnrichmentFailure` using `IO.raiseError`.
-    **/
+    * */
   private def enrichMovieWithMetascore(movie: Movie): IO[EnrichedMovie] = ???
 
 }
