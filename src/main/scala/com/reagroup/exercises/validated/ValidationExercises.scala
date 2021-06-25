@@ -1,7 +1,7 @@
 package com.reagroup.exercises.validated
 
-import cats.data.Validated
-import cats.data.ValidatedNel
+import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import cats.data.Validated.{Invalid, Valid, condNel}
 import cats.implicits._
 
 /**
@@ -37,8 +37,22 @@ object ValidationExercises {
     *
     * Hint: Use the `.invalidNel` and `.validNel` combinators
     */
+
   def nameValidation(name: String, label: String): ValidatedNel[ValidationError, String] =
-    ???
+    if (name.isEmpty)
+      Invalid(NonEmptyList(NameIsEmpty(label), Nil))
+    else
+      Valid(name)
+
+  //  def nameValidation(name: String, label: String): ValidatedNel[ValidationError, String] =
+  //    if (name.isEmpty)
+  //      NameIsEmpty(label).invalidNel
+  //    else
+  //      name.validNel
+  //
+  //  def nameValidation2(name: String, label: String): ValidatedNel[ValidationError, String] =
+  //    condNel(name.nonEmpty, name, NameIsEmpty(label))
+
 
   /**
     * If the `password` does not contain a numeric character, return a `PasswordTooWeak`.
@@ -48,7 +62,7 @@ object ValidationExercises {
     * Hint: Use `password.exists(Character.isDigit)`
     */
   def passwordStrengthValidation(password: String): ValidatedNel[ValidationError, String] =
-    ???
+    Either.cond(password.exists(Character.isDigit), password, PasswordTooWeak).toValidatedNel
 
   /**
     * If the `password` length is not greater than 8 characters, return `PasswordTooShort`.
@@ -56,14 +70,22 @@ object ValidationExercises {
     * Otherwise, return the `password`.
     */
   def passwordLengthValidation(password: String): ValidatedNel[ValidationError, String] =
-    ???
+    Validated.condNel(password.length >= 8, password, PasswordTooShort)
+
+  //  Either.cond(password.length >= 8, password, PasswordTooShort).toValidatedNel
+
+  //  if (password.length >= 8)
+  //    password.validNel
+  //  else
+  //    PasswordTooShort.invalidNel
 
   /**
     * Compose `passwordStrengthValidation` and `passwordLengthValidation` using Applicative `productR`
     * to construct a larger `passwordValidation`.
     */
-  def passwordValidation(password: String): ValidatedNel[ValidationError, String] =
-    ???
+  def passwordValidation(password: String): ValidatedNel[ValidationError, String] = {
+    passwordStrengthValidation(password).productL(passwordLengthValidation(password))
+  }
 
   /**
     * Compose `nameValidation` and `passwordValidation` to construct a function to `validatePerson`.
@@ -71,7 +93,18 @@ object ValidationExercises {
     * Take a look at `.mapN` for this one, to map a tuple of ValidatedNels to a singular ValidatedNel
     */
   def validatePerson(firstName: String, lastName: String, password: String): ValidatedNel[ValidationError, Person] =
-    ???
+    (
+      nameValidation(firstName, "firstName"),
+      nameValidation(lastName, "lastName"),
+      passwordValidation(password)
+      ).mapN(Person)
+
+  //  def validatePerson(firstName: String, lastName: String, password: String): ValidatedNel[ValidationError, Person] = {
+  //    ( nameValidation(firstName, "firstName")
+  //      , nameValidation(lastName, "lastName")
+  //      , passwordValidation(password)
+  //      ).mapN((f,l,p) => Person(f,l,p))
+  //  }
 
 
   /**
@@ -81,7 +114,14 @@ object ValidationExercises {
   type FirstName = String
   type LastName = String
   type Password = String
+
   def validatePeople(inputs: List[(FirstName, LastName, Password)]): ValidatedNel[ValidationError, List[Person]] =
-    ???
+    inputs.traverse {
+      case (firstName, lastName, password) => validatePerson(firstName, lastName, password)
+    }
+
+//  def validatePeople(inputs: List[(FirstName, LastName, Password)]): ValidatedNel[ValidationError, List[Person]] = {
+//    inputs.traverse { case (f, l, p) => validatePerson(f, l, p) }
+//  }
 
 }
