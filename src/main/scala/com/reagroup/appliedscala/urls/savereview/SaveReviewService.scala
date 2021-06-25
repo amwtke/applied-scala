@@ -24,13 +24,26 @@ class SaveReviewService(saveReview: (MovieId, ValidatedReview) => IO[ReviewId],
   //        .productR(validateReview(review))
   //        .traverse(r => saveReview(movieId, r))
   //    } yield reviewId
+
+  //  {
+  //    fetchMovie(movieId)
+  //      .map(validateMovie)
+  //      .map(x => x.productR(validateReview(review)))
+  //      .flatMap {
+  //        case Invalid(e) => IO.pure(e.invalid)
+  //        case Valid(review) => saveReview(movieId, review).map(x => x.valid)
+  //      }
+  //  }
+
   {
     fetchMovie(movieId)
       .map(validateMovie)
-      .map(x => x.productR(validateReview(review)))
       .flatMap {
         case Invalid(e) => IO.pure(e.invalid)
-        case Valid(review) => saveReview(movieId, review).map(x => x.valid)
+        case Valid(_) => validateReview(review) match {
+          case Invalid(e) => IO.pure(e.invalid)
+          case Valid(review) => saveReview(movieId, review).map(x => x.valid)
+        }
       }
   }
 
